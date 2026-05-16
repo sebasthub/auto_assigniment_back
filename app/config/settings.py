@@ -1,4 +1,5 @@
 from functools import cached_property
+from pathlib import Path
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -12,6 +13,17 @@ class Settings(BaseSettings):
     environment: str = "development"
     frontend_url: str = "http://localhost:3000"
     cors_allowed_origins: str = ""
+    onlyoffice_url: str = "http://localhost:8080"
+    browser_backend_url: str = "http://localhost:8000"
+    public_backend_url: str = "http://host.docker.internal:8000"
+    storage_backend: str = "local"
+    storage_local_dir: Path = Path("storage/documents")
+    storage_bucket: str | None = None
+    storage_region: str | None = None
+    storage_endpoint_url: str | None = None
+    storage_access_key_id: str | None = None
+    storage_secret_access_key: str | None = None
+    storage_addressing_style: str = "path"
 
     model_config = SettingsConfigDict(
         env_file=".env",
@@ -44,6 +56,12 @@ class Settings(BaseSettings):
         if not self.refresh_secret_key:
             raise RuntimeError("REFRESH_SECRET_KEY environment variable is required")
         return self.refresh_secret_key
+
+    def public_url(self, path: str) -> str:
+        return f"{self.public_backend_url.rstrip('/')}{path}"
+
+    def browser_url(self, path: str) -> str:
+        return f"{self.browser_backend_url.rstrip('/')}{path}"
 
 
 settings = Settings()

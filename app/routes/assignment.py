@@ -1,13 +1,19 @@
 from fastapi import APIRouter, HTTPException, Query
 
 from app.models.assignment import Assignment
+from app.models.document_record import DocumentRecord
 from app.schemas.assignment import AssignmentBase, AssignmentGet, PaginatedAssignments
+from app.services.document_service import delete_assignment_document
 
 router = APIRouter(tags=["Assignments"])
 
 
 async def serialize_assignment(assignment: Assignment) -> AssignmentGet:
     topics = await assignment.topics.filter(active=True, deleted=False)
+    document_record = await DocumentRecord.get_or_none(
+        assignment_id=assignment.id,
+        deleted=False,
+    )
     return AssignmentGet.model_validate(
         {
             "id": assignment.id,
@@ -15,6 +21,7 @@ async def serialize_assignment(assignment: Assignment) -> AssignmentGet:
             "active": assignment.active,
             "deleted": assignment.deleted,
             "topics": topics,
+            "document_record": document_record,
         }
     )
 
@@ -69,6 +76,7 @@ async def update_assignment(assignment_id: int, assignment: AssignmentBase):
 @router.delete("/assignments/{assignment_id}", response_model=AssignmentGet)
 async def delete_assignment(assignment_id: int):
     assignment = await get_assignment_or_404(assignment_id)
+    await delete_assignment_document(assignment.id)
     await assignment.topics.filter(deleted=False).update(active=False, deleted=True)
     await Assignment.filter(id=assignment.id).update(active=False, deleted=True)
     assignment.active = False

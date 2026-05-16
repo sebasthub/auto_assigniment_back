@@ -10,6 +10,7 @@ TORTOISE_ORM = {
                 "app.models.topic",
                 "app.models.refresh_token",
                 "aerich.models",
+                "app.models.document_record",
             ],
             "default_connection": "default",
         }
