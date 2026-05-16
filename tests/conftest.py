@@ -8,11 +8,13 @@ from tortoise import Tortoise
 os.environ.setdefault("SECRET_KEY", "test-secret-key-32-bytes-minimum-value")
 os.environ.setdefault("REFRESH_SECRET_KEY", "test-refresh-secret-key-32-bytes-minimum-value")
 
+from app.config.security import hash_password  # noqa: E402
 from app.config.settings import settings  # noqa: E402
 from app.config.tortoise import TORTOISE_ORM  # noqa: E402
 from app.main import app  # noqa: E402
 from app.models.assignment import Assignment  # noqa: E402
 from app.models.topic import Topic  # noqa: E402
+from app.models.user import User  # noqa: E402
 
 
 @pytest.fixture()
@@ -41,9 +43,25 @@ def api_client(tmp_path):
 async def _prepare_db():
     await Tortoise.init(config=TORTOISE_ORM)
     await Tortoise.generate_schemas()
-    first = await Assignment.create(title="Primeira atividade")
-    second = await Assignment.create(title="Segunda atividade")
-    await Assignment.create(title="Atividade removida", active=False, deleted=True)
+    user = await User.create(
+        email="user@example.com",
+        hashed_password=hash_password("correct-password"),
+        name="Test User",
+    )
+    other_user = await User.create(
+        email="other@example.com",
+        hashed_password=hash_password("correct-password"),
+        name="Other User",
+    )
+    first = await Assignment.create(title="Primeira atividade", user=user)
+    second = await Assignment.create(title="Segunda atividade", user=user)
+    await Assignment.create(
+        title="Atividade removida",
+        active=False,
+        deleted=True,
+        user=user,
+    )
+    await Assignment.create(title="Atividade de outro usuario", user=other_user)
     await Topic.create(
         assignment=first,
         question="Pergunta 1",

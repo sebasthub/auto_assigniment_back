@@ -7,4 +7,4 @@ class Assignment(Model):
     title = fields.CharField(max_length=255)
     active = fields.BooleanField(default=True)
     deleted = fields.BooleanField(default=False)
-    
+    user = fields.ForeignKeyField("models.User", related_name="assignments")
