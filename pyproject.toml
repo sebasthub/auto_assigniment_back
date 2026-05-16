@@ -1,0 +1,17 @@
+[project]
+name = "teste"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "aerich>=0.8.2",
+    "aiosqlite>=0.22.1",
+    "fastapi[standard]>=0.136.1",
+    "tortoise-orm>=0.25.1,<1.0.0",
+]
+
+[tool.aerich]
+tortoise_orm = "app.config.tortoise.TORTOISE_ORM"
+location = "./migrations"
+src_folder = "./."
