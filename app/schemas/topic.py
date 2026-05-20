@@ -7,8 +7,10 @@ class TopicBase(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
 
-class TopicCreate(TopicBase):
+class TopicCreate(BaseModel):
+    question: str = Field(min_length=1)
     assignment_id: int = Field(gt=0)
+    model_config = ConfigDict(str_strip_whitespace=True)
 
 
 class TopicGet(TopicCreate):
